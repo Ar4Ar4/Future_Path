@@ -67,6 +67,7 @@ public class SecurityConfig {
 						
 						.requestMatchers("/admin/**").hasAnyAuthority(CommonConstant.ROLE_ADMIN)
 						.requestMatchers("/api/admin/**").hasAnyAuthority(CommonConstant.ROLE_ADMIN)
+						.requestMatchers("/assessment/result/view").hasAnyAuthority(CommonConstant.ROLE_ADMIN, CommonConstant.ROLE_USER)
 						
 						.requestMatchers("/dashboard/**").hasAuthority(CommonConstant.ROLE_USER)
 						.requestMatchers("/quiz/**").hasAuthority(CommonConstant.ROLE_USER)
