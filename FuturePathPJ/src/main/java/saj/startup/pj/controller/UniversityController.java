@@ -1,0 +1,217 @@
+package saj.startup.pj.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import saj.startup.pj.common.MessageConstant;
+import saj.startup.pj.model.dto.StrandegreeDto;
+import saj.startup.pj.model.dto.UniversityDto;
+import saj.startup.pj.model.service.StrandegreeService;
+import saj.startup.pj.model.service.UniversityService;
+
+@Controller
+public class UniversityController {
+	
+	@Autowired
+	private StrandegreeService strandegreeService;
+	
+	@Autowired
+	private UniversityService universityService;
+
+	@GetMapping("/admin/universities")
+	public String showUniversities(Model model) {
+		
+		try {
+			UniversityDto outDto = universityService.getUniversitiesOverview();
+			
+			model.addAttribute("universityDto", outDto);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		model.addAttribute("page", "universities");
+		
+		return "university/university-view";
+	}
+	
+	@GetMapping("/admin/universities/add")
+	public String showUniversitiesAdd(Model model, @ModelAttribute UniversityDto webDto) {
+		
+		try {
+			
+			StrandegreeDto outDto = strandegreeService.getAllStrandegreesNoPageable();
+			
+			model.addAttribute("strandegreeDto", outDto);
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+		model.addAttribute("page", "universities");
+		
+		return "university/university-add";
+	}
+	
+	@PostMapping("/admin/universities/add")
+	public String postUniversitiesAdd(@ModelAttribute UniversityDto webDto,
+			RedirectAttributes ra) {
+	      
+	    try {
+		    universityService.saveUniversity(webDto);
+		    
+		    ra.addFlashAttribute("isSuccess", true);
+		    ra.addFlashAttribute("successMsg", MessageConstant.UNIVERSITY_ADDED);
+		    
+	    } catch(Exception e) {
+	    	
+	    	e.printStackTrace();
+	    	
+			ra.addFlashAttribute("isError", true);
+			ra.addFlashAttribute("errorMsg", MessageConstant.SOMETHING_WENT_WRONG);
+	    }
+	   
+	    return "redirect:/admin/universities";
+	}
+	
+	@GetMapping("/admin/universities/edit")
+	public String showUniversitiesEdit(Model model, @ModelAttribute UniversityDto webDto) {
+		
+		try {
+			UniversityDto outDto = universityService.getUniversity(webDto);
+			
+			System.out.println(outDto);
+			
+			StrandegreeDto strandegreeOutDto = strandegreeService.getAllStrandegreesNoPageable();
+			
+			outDto.setIdPk(webDto.getIdPk());
+			
+			model.addAttribute("strandegreeDto", strandegreeOutDto);
+			model.addAttribute("universityDto", outDto);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+		model.addAttribute("page", "universities");
+		
+		return "university/university-edit";
+	}
+	
+	@PostMapping("/admin/universities/edit")
+	public String postUniversitiesEdit(@ModelAttribute UniversityDto webDto,
+			RedirectAttributes ra) {
+	      
+	    try {
+		    universityService.updateUniversity(webDto);
+		    
+		    ra.addFlashAttribute("isSuccess", true);
+		    ra.addFlashAttribute("successMsg", MessageConstant.UNIVERSITY_EDITED);
+		    
+	    } catch(Exception e) {
+	    	
+	    	e.printStackTrace();
+	    	
+			ra.addFlashAttribute("isError", true);
+			ra.addFlashAttribute("errorMsg", MessageConstant.SOMETHING_WENT_WRONG);
+	    }
+	   
+	    return "redirect:/admin/universities";
+	}
+	
+	@PostMapping("/admin/universities/delete")
+	public String deleteUniversity(@ModelAttribute UniversityDto webDto,
+			RedirectAttributes ra) {
+		
+		try {
+			
+			universityService.deleteUniversity(webDto);
+		    
+		    ra.addFlashAttribute("isSuccess", true);
+		    ra.addFlashAttribute("successMsg", MessageConstant.UNIVERSITY_DELETED);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+	    	
+			ra.addFlashAttribute("isError", true);
+			ra.addFlashAttribute("errorMsg", MessageConstant.SOMETHING_WENT_WRONG);	
+		}
+		
+		return "redirect:/admin/universities";
+	}
+	
+	@GetMapping("/admin/universities/details")
+	public String detailsUniversity(@ModelAttribute UniversityDto webDto,
+			Model model,
+			RedirectAttributes ra) {
+		
+		try {
+			UniversityDto outDto = universityService.getUniversity(webDto);
+			
+			System.out.println(outDto);
+			
+			StrandegreeDto strandegreeOutDto = strandegreeService.getAllStrandegreesNoPageable();
+			
+			outDto.setIdPk(webDto.getIdPk());
+			
+			model.addAttribute("strandegreeDto", strandegreeOutDto);
+			model.addAttribute("universityDto", outDto);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+		model.addAttribute("page", "universities");
+		
+		return "university/university-details";
+	}
+	
+	
+	/*
+	 * USER
+	 * 
+	 */
+	@GetMapping("/universities")
+	public String showUniversitiesList(Model model) {
+		
+		model.addAttribute("page", "universities");
+		
+		return "university/university-list";
+	}
+	
+	@GetMapping("/universities/details")
+	public String detailsUniversityForUser(@ModelAttribute UniversityDto webDto,
+			Model model,
+			RedirectAttributes ra) {
+		
+		try {
+			UniversityDto outDto = universityService.getUniversity(webDto);
+			
+			System.out.println(outDto);
+			
+			StrandegreeDto strandegreeOutDto = strandegreeService.getAllStrandegreesNoPageable();
+			
+			outDto.setIdPk(webDto.getIdPk());
+			
+			model.addAttribute("strandegreeDto", strandegreeOutDto);
+			model.addAttribute("universityDto", outDto);
+			
+		}catch(Exception e) {
+			
+			e.printStackTrace();
+		}
+		
+		model.addAttribute("page", "universities");
+		
+		return "university/university-details-two";
+	}
+
+}

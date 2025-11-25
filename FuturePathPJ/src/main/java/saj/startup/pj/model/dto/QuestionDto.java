@@ -1,0 +1,44 @@
+package saj.startup.pj.model.dto;
+
+import java.util.List;
+
+import lombok.Data;
+import saj.startup.pj.model.dao.entity.QuestionOverviewData;
+import saj.startup.pj.model.object.FilterAndSearchObj;
+import saj.startup.pj.model.object.PaginationObj;
+import saj.startup.pj.model.object.QuestionObj;
+
+@Data
+public class QuestionDto {
+	
+	private int idPk;
+
+	public String category;
+	
+	private int strandegreeIdPk;
+	
+	private String question;
+	
+	private List<String> answers;
+	
+	private int correctIndex;
+	
+	private QuestionOverviewData overview;
+	
+	private List<QuestionObj> questions;
+	
+	private PaginationObj pagination;
+	
+	private FilterAndSearchObj filter;
+	
+	private String mode;
+	
+	private List<String> strands;
+	
+	private List<String> degrees;
+	
+	private QuestionObj questionObj;
+	
+	private List<Integer> riasecCodes;
+	
+}

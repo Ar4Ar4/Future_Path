@@ -1,0 +1,67 @@
+-- 💻 BS Information Systems (BSIS)
+INSERT INTO question (strandegree_id_pk, question, is_active, is_deleted, created_at)
+VALUES
+(3, 'What is the main goal of a Management Information System (MIS)?', TRUE, FALSE, NOW()),
+(3, 'Which component of an Information System handles data storage and retrieval?', TRUE, FALSE, NOW()),
+(3, 'What is the role of a Systems Analyst in an organization?', TRUE, FALSE, NOW()),
+(3, 'Which of the following best describes a Decision Support System (DSS)?', TRUE, FALSE, NOW()),
+(3, 'What is the main difference between data and information?', TRUE, FALSE, NOW()),
+(3, 'Which process ensures that system requirements meet business needs?', TRUE, FALSE, NOW()),
+(3, 'What type of system integrates various business functions like finance and HR?', TRUE, FALSE, NOW()),
+(3, 'What is the purpose of business process modeling?', TRUE, FALSE, NOW()),
+(3, 'Which of the following tools is commonly used for data visualization in business intelligence?', TRUE, FALSE, NOW()),
+(3, 'What is the primary purpose of database normalization?', TRUE, FALSE, NOW());
+
+
+-- 🧠 Answers for BS Information Systems (BSIS)
+INSERT INTO answer (question_id_pk, answer, is_correct, is_active, is_deleted, created_at)
+VALUES
+-- Q21: What is the main goal of a Management Information System (MIS)?
+(21, 'Business Intelligence', FALSE, TRUE, FALSE, NOW()),
+(21, 'Data Warehousing', FALSE, TRUE, FALSE, NOW()),
+(21, 'To provide information for decision-making and management control', TRUE, TRUE, FALSE, NOW()),
+
+-- Q22: Which component of an Information System handles data storage and retrieval?
+(22, 'Systems Integration', FALSE, TRUE, FALSE, NOW()),
+(22, 'IT Infrastructure', FALSE, TRUE, FALSE, NOW()),
+(22, 'Database Management System (DBMS)', TRUE, TRUE, FALSE, NOW()),
+
+-- Q23: What is the role of a Systems Analyst in an organization?
+(23, 'To analyze and design information systems that meet business needs', TRUE, TRUE, FALSE, NOW()),
+(23, 'To perform digital marketing', FALSE, TRUE, FALSE, NOW()),
+(23, 'To manage financial transactions', FALSE, TRUE, FALSE, NOW()),
+
+-- Q24: Which of the following best describes a Decision Support System (DSS)?
+(24, 'A system that supports management decisions using data analysis models', TRUE, TRUE, FALSE, NOW()),
+(24, 'A system that manages employee payroll', FALSE, TRUE, FALSE, NOW()),
+(24, 'A system that handles customer orders', FALSE, TRUE, FALSE, NOW()),
+
+-- Q25: What is the main difference between data and information?
+(25, 'Data are raw facts; information is processed data with meaning', TRUE, TRUE, FALSE, NOW()),
+(25, 'Data and information mean the same thing', FALSE, TRUE, FALSE, NOW()),
+(25, 'Information is less valuable than data', FALSE, TRUE, FALSE, NOW()),
+
+-- Q26: Which process ensures that system requirements meet business needs?
+(26, 'System Analysis and Design', TRUE, TRUE, FALSE, NOW()),
+(26, 'Network Administration', FALSE, TRUE, FALSE, NOW()),
+(26, 'Server Management', FALSE, TRUE, FALSE, NOW()),
+
+-- Q27: What type of system integrates various business functions like finance and HR?
+(27, 'Enterprise Resource Planning (ERP)', TRUE, TRUE, FALSE, NOW()),
+(27, 'Testing Methodologies', FALSE, TRUE, FALSE, NOW()),
+(27, 'Version Control Systems', FALSE, TRUE, FALSE, NOW()),
+
+-- Q28: What is the purpose of business process modeling?
+(28, 'To analyze and improve organizational processes for efficiency', TRUE, TRUE, FALSE, NOW()),
+(28, 'To develop mobile apps', FALSE, TRUE, FALSE, NOW()),
+(28, 'To deploy databases', FALSE, TRUE, FALSE, NOW()),
+
+-- Q29: Which of the following tools is commonly used for data visualization in business intelligence?
+(29, 'Power BI', TRUE, TRUE, FALSE, NOW()),
+(29, 'Information Retrieval', FALSE, TRUE, FALSE, NOW()),
+(29, 'Document Management', FALSE, TRUE, FALSE, NOW()),
+
+-- Q30: What is the primary purpose of database normalization?
+(30, 'To reduce data redundancy and improve data integrity', TRUE, TRUE, FALSE, NOW()),
+(30, 'To increase database size', FALSE, TRUE, FALSE, NOW()),
+(30, 'To store unstructured data', FALSE, TRUE, FALSE, NOW());
