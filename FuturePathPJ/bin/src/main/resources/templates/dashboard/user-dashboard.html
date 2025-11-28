@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <head>
+      <meta charset="UTF-8">
+      <title>FuturePath | Dashboard</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+      <link rel="stylesheet" th:href="@{/css/common.css}" />
+      <link rel="stylesheet" th:href="@{/css/user-dashboard.css}" />
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+       <link rel="icon" type="image/x-icon" th:href="@{favicon.ico}" />  
+   </head>
+   <body>
+      <!-- Sidebar -->
+      <nav th:replace="~{sidebar :: sidebar}"></nav>
+      <main>
+         <!-- Header -->
+         <nav th:replace="~{header :: header}"></nav>
+         <hr>
+         <nav class="sub-header">
+            <div>
+               <span class="crumb">FuturePath</span>
+               <i class="fa-solid fa-chevron-right separator"></i>
+               <span class="crumb active">DASHBOARD</span>
+            </div>
+         </nav>
+         <hr>
+         <div class="content" th:object="${assessmentDto}">
+            <div class="welcome-card">
+               <div class="greeting">Welcome back, <strong th:text="${session.fullname}">User</strong> 👋</div>
+               <div class="message">Ready to discover your future path?</div>
+            </div>
+            <div class="stats-card">
+               <div class="title">📊 Assessment Statistics</div>
+               <div class="stats-container">
+                  <div class="stat-item">
+                     <div class="number" th:text="*{userAssessmentStatistics?.takenAssessments ?: 0}">0</div>
+                     <div class="label">Assessments Taken</div>
+                  </div>
+                  <div class="stat-item">
+                     <div class="number" th:text="|*{userAssessmentStatistics?.averageScores ?: 0}%|">0%</div>
+                     <div class="label">Average Score</div>
+                  </div>
+                  <div class="stat-item">
+                     <div class="number" th:text="|*{userAssessmentStatistics?.highestScores ?: 0}%|">0%</div>
+                     <div class="label">Highest Score</div>
+                  </div>
+                  <div class="stat-item">
+                     <div class="number" th:text="|*{userAssessmentStatistics?.lowestScores ?: 0}%|">0%</div>
+                     <div class="label">Lowest Score</div>
+                  </div>
+                  <div class="stat-item">
+                     <div class="number" 
+                        th:text="${@dateTimeUtil.formatTimestamp(assessmentDto.userAssessmentStatistics.lastTaken)}">
+                        -
+                     </div>
+                     <div class="label">Last Taken</div>
+                  </div>
+               </div>
+            </div>
+            <div class="quick-actions-card">
+               <div class="title">⚡ Quick Actions</div>
+               <div class="actions-container">
+                  <button class="btn primary">Take Assessment</button>
+                  <button class="btn primary">View All University</button>
+                  <button class="btn primary">View All Programs</button>
+                  <button class="btn primary">View All History</button>
+               </div>
+            </div>
+            <div class="group-row">
+               <div class="group-column">
+                  <div class="assessment-card">
+                     <div class="title">🧠 Career Assessment</div>
+                     <div class="note">*This shows your last taken assessment result</div>
+                     <div class="info">
+                        <div class="status completed">Completed</div>
+                        <div>🎯 Last Score: <span th:text="|*{percentage ?: 0}%|">0%</span></div>
+                        <div>✅ Correct: <span th:text="*{totalCorrect ?: 0}">0%</span></div>
+                        <div>❌ Incorrect: <span th:text="*{totalIncorrect ?: 0}">0%</span></div>
+                        <div>🗓️ Last Taken: <span th:text="${@dateTimeUtil.formatTimestamp(assessmentDto.userAssessmentStatistics.lastTaken)}">-</span></div>
+                     </div>
+                     <a th:href="@{/assessment/result/view(resultIdPk=${assessmentDto.resultIdPk})}" 
+                        class="btn primary">View Result</a>
+                  </div>
+                  <div class="recommendation-card">
+                     <div class="title">🎯 Your Recommendation</div>
+                     <div class="note">*Based on your last assessment</div>
+                     <div class="details">
+                        <div>🎓 Best-fit Degree:</div>
+                        <ul >
+                           <li th:each="rec : *{top3Recommendations}" th:text="${rec.name}">
+                              Degree Name
+                           </li>
+                        </ul>
+                        <div>
+                           🏛️ Suggested University: 
+                           <strong>
+                           <a th:href="@{/universities}">Check Top University Matches</a>
+                           </strong>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="university-card">
+                  <div class="title">🏛️ Top University Matches</div>
+                  <div class="university-list">
+                     <div class="university-item" 
+                        th:each="uni, iterStat : *{universities}" 
+                        th:if="${iterStat.index < 4}">
+                        <div class="info">
+                           <span><strong th:text="${uni.universityName}">University Name</strong></span>
+                           <span>📍 <span th:text="${uni.city + ', ' + uni.province}">City, Province</span></span>
+                           <span>⭐ Ranking: <span th:text="${uni.ranking != null && uni.ranking > 0 ? uni.ranking : '-'}">-</span></span>
+                        </div>
+                     </div>
+                  </div>
+                  <!-- Show "View More" only if there are more than 4 universities -->
+                  <button class="btn primary" th:if="*{universities.size() > 4}">View More</button>
+               </div>
+            </div>
+            <div class="history-card">
+               <div class="title">📜 Assessment History</div>
+               <div class="progress-summary">
+                  <span>2 of 3 assessments completed</span>
+                  <span>Progress</span>
+               </div>
+               <div class="progress-bar">
+                  <div class="progress-bar-inner" style="width: 66%;"></div>
+               </div>
+               <div class="assessment-list">
+                  <div class="assessment-item">
+                     <div class="info">
+                        <span>🧠 Career Assessment</span>
+                        <span>🗓️ Taken on: Nov 3, 2025</span>
+                     </div>
+                     <div class="status completed">Completed</div>
+                  </div>
+                  <div class="assessment-item">
+                     <div class="info">
+                        <span>🧠 Skills Assessment</span>
+                        <span>🗓️ Taken on: Nov 5, 2025</span>
+                     </div>
+                     <div class="status pending">Not Yet Taken</div>
+                  </div>
+                  <div class="assessment-item">
+                     <div class="info">
+                        <span>🧠 Personality Assessment</span>
+                        <span>🗓️ Taken on: Nov 6, 2025</span>
+                     </div>
+                     <div class="status completed">Completed</div>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <nav class="footer">
+            <div>
+               <span>All rights reserved by FuturePath</span>
+            </div>
+            <div class="terms">
+               <span>Terms of Use</span>
+               <span>Privacy Policy</span>
+               <span>Contact us</span>
+            </div>
+         </nav>
+      </main>
+   </body>
+</html>

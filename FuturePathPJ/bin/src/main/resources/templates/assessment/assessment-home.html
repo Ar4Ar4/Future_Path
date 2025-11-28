@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <head>
+      <meta charset="UTF-8">
+      <title>FuturePath | Assessment</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+      <link rel="stylesheet" th:href="@{/css/common.css}" />
+      <link rel="stylesheet" th:href="@{/css/quiz-home.css}" />
+   </head>
+   <body>
+      <nav th:replace="~{sidebar :: sidebar}"></nav>
+      <main>
+         <nav th:replace="~{header :: header}"></nav>
+         <hr>
+         <nav class="sub-header">
+            <div>
+               <span class="crumb">FuturePath</span>
+               <i class="fa-solid fa-chevron-right separator"></i>
+               <span class="crumb active">ASSESSMENT</span>
+            </div>
+         </nav>
+         <hr>
+         <div class="content">
+            <!-- CARD 1: Choose Assessment Type -->
+            <form th:action="@{/assessment}" method="POST" th:object="${assessmentDto}" class="assessment-card" id="assessmentForm">
+               <label>Which one would you take the assessment for?</label>
+               <div class="message">
+                  Take this short assessment to discover which <strong>college degree</strong> or 
+                  <strong>senior high strand</strong> matches your strengths, interests, and goals.  
+                  <br><br>
+                  Whether you're aiming for a tech career, creative arts, or something else — 
+                  let’s find out which path is right for you! 🌟
+               </div>
+               <th:block th:if="${!config.defaultDegreeAvailability and !config.customDegreeAvailability}">
+                  <button type="button" class="disabled-btn" disabled>
+                  <i class="fa-solid fa-graduation-cap"></i> FOR COLLEGE
+                  </button>
+               </th:block>
+               <th:block th:if="${config.defaultDegreeAvailability or config.customDegreeAvailability}">
+                  <button type="button" id="collegeBtn">
+                  <i class="fa-solid fa-graduation-cap"></i> FOR COLLEGE
+                  </button>
+               </th:block>
+               <button type="button" id="strandBtn">
+               <i class="fa-solid fa-school"></i> FOR SENIOR HIGH STRAND
+               </button>
+               <input type="hidden" name="degrees" id="degreeInput"> 
+               <input type="hidden" name="strands" id="strandInput">
+            </form>
+            <!-- CARD 2: College Assessment -->
+            <div id="collegeOptions" class="assessment-card">
+               <h3>College Assessment Options</h3>
+               <p>Choose between a default or custom college assessment.</p>
+               <div class="message">
+                  💡 <strong>Note:</strong> The default assessment automatically retrieves questions 
+                  from all available college degree programs in the system.
+               </div>
+               <th:block th:if="${config.defaultDegreeAvailability}">
+                  <button type="submit" form="assessmentForm" class="transitioning" name="mode" value="DEGREE-DEFAULT-MODE">
+                  Start Default Assessment
+                  </button>
+               </th:block>
+               <th:block th:unless="${config.defaultDegreeAvailability}">
+                  <button type="button" class="disabled-btn" disabled>
+                  Start Default Assessment
+                  </button>
+               </th:block>
+               <hr>
+               <h4>Custom Assessment</h4>
+               <p>Select which degrees to include and how many questions to answer.</p>
+               <div class="message">
+                  💡 <strong>Note:</strong> The custom assessment will automatically generate 
+                  randomized questions based on your input degree and question count.
+               </div>
+               <div class="degree-buttons">
+                  <div class="degree-buttons">
+                     <div class="degree-btn"
+                        th:each="degree : ${strandegreeDto.strandegreesQuestions}"
+                        th:if="${degree.category == 'DEGREE'}"
+                        th:text="${degree.code}"
+                        th:data-degree="${degree.code}"
+                        th:title="${degree.name}"
+                        th:classappend="${degree.totalQuestions == 0} ? ' disabled' : ''">
+                     </div>
+                  </div>
+               </div>
+               <div id="selectedDegrees" class="selected-items"></div>
+               <input type="hidden" name="degrees" id="degreeInput">
+               <th:block th:if="${config.customDegreeAvailability}">
+                  <button type="submit" form="assessmentForm" class="transitioning" name="mode" value="DEGREE-CUSTOM-MODE">
+                  Start Custom Assessment
+                  </button>
+               </th:block>
+               <th:block th:unless="${config.customDegreeAvailability}">
+                  <button type="button" class="disabled-btn" disabled>
+                  Start Custom Assessment
+                  </button>
+               </th:block>
+            </div>
+            <!-- CARD 3: Strand Assessment -->
+            <div id="strandOptions" class="assessment-card">
+               <h3>Senior High Strand Assessment</h3>
+               <p>Choose between a default or custom strand assessment.</p>
+               <div class="message">
+                  💡 <strong>Note:</strong> The default assessment retrieves questions 
+                  from all strands available in the system.
+               </div>
+               <th:block th:if="${config.defaultStrandAvailability}">
+                  <button type="submit" form="assessmentForm" class="transitioning" name="mode" value="STRAND-DEFAULT-MODE">
+                  Start Default Assessment
+                  </button>
+               </th:block>
+               <th:block th:unless="${config.defaultStrandAvailability}">
+                  <button type="button" class="disabled-btn" disabled>
+                  Start Default Assessment
+                  </button>
+               </th:block>
+               <hr>
+               <h4>Custom Strand Assessment</h4>
+               <p>Select strands and question count for a personalized test.</p>
+               <div class="message">
+                  💡 <strong>Note:</strong> The custom strand assessment randomizes questions 
+                  based on your chosen strands and question limit.
+               </div>
+               <div class="degree-buttons">
+                  <div class="degree-buttons">
+                     <div class="degree-btn"
+                        th:each="strand : ${strandegreeDto.strandegreesQuestions}"
+                        th:if="${strand.category == 'STRAND'}"
+                        th:text="${strand.code}"
+                        th:data-degree="${strand.code}"
+                        th:title="${strand.name}"
+                        th:classappend="${strand.totalQuestions == 0} ? ' disabled' : ''">
+                     </div>
+                  </div>
+               </div>
+               <div id="selectedStrands" class="selected-items"></div>
+               <input type="hidden" name="strands" id="strandInput">
+               <th:block th:if="${config.customStrandAvailability}">
+                  <button type="submit" form="assessmentForm" class="transitioning" name="mode" value="STRAND-CUSTOM-MODE">
+                  Start Custom Assessment
+                  </button>
+               </th:block>
+               <th:block th:unless="${config.customStrandAvailability}">
+                  <button type="button" class="disabled-btn" disabled>
+                  Start Custom Assessment
+                  </button>
+               </th:block>
+            </div>
+         </div>
+         <nav class="footer">
+            <div>
+               <span>All rights reserved by FuturePath</span>
+            </div>
+            <div class="terms">
+               <span>Terms of Use</span>
+               <span>Privacy Policy</span>
+               <span>Contact us</span>
+            </div>
+         </nav>
+      </main>
+      <!-- Selection Warning Modal -->
+      <div class="themed-modal-overlay" id="selectionModal">
+         <div class="themed-modal-box">
+            <h3>Action Needed</h3>
+            <p>Please select at least one option before starting the custom assessment.</p>
+            <div class="themed-modal-actions">
+               <button class="modal-btn continue-btn" onclick="closeSelectionModal()">OK</button>
+            </div>
+         </div>
+      </div>
+      <script th:inline="javascript">
+         console.log(/*[[${strandegreeDto}]]*/'');
+      </script>
+      <script th:src="@{/script/loading.js}"></script>
+      <script>
+         const collegeBtn = document.getElementById('collegeBtn');
+         const strandBtn = document.getElementById('strandBtn');
+         const collegeOptions = document.getElementById('collegeOptions');
+         const strandOptions = document.getElementById('strandOptions');
+         
+         collegeBtn.addEventListener('click', () => {
+           strandOptions.style.display = 'none';
+           collegeOptions.style.display = 'block';
+           window.scrollTo({ top: collegeOptions.offsetTop - 80, behavior: 'smooth' });
+         });
+         
+         strandBtn.addEventListener('click', () => {
+           collegeOptions.style.display = 'none';
+           strandOptions.style.display = 'block';
+           window.scrollTo({ top: strandOptions.offsetTop - 80, behavior: 'smooth' });
+         });
+         
+         function setupSelection(buttonSelector, containerId, inputId) {
+             const buttons = document.querySelectorAll(buttonSelector);
+             const container = document.getElementById(containerId);
+             const hiddenInput = document.getElementById(inputId);
+             let selected = [];
+         
+             buttons.forEach(btn => {
+                 btn.addEventListener('click', () => {
+                     const val = btn.dataset.degree;
+                     if (selected.includes(val)) {
+                         selected = selected.filter(d => d !== val);
+                         btn.classList.remove('selected');
+                     } else {
+                         selected.push(val);
+                         btn.classList.add('selected');
+                     }
+                     updatePreview(container, selected, hiddenInput, buttonSelector);
+                 });
+             });
+         }
+         
+         function updatePreview(container, selected, hiddenInput, buttonSelector) {
+             container.innerHTML = '';
+             selected.forEach(val => {
+                 const span = document.createElement('span');
+                 span.innerHTML = `${val} <i class="fa-solid fa-xmark"></i>`;
+                 span.querySelector('i').addEventListener('click', () => {
+                     selected.splice(selected.indexOf(val), 1);
+                     document.querySelector(`${buttonSelector}[data-degree="${val}"]`).classList.remove('selected');
+                     updatePreview(container, selected, hiddenInput, buttonSelector);
+                 });
+                 container.appendChild(span);
+             });
+             hiddenInput.value = selected.join(',');
+         }
+         
+         // Initialize
+         setupSelection('#collegeOptions .degree-btn', 'selectedDegrees', 'degreeInput');
+         setupSelection('#strandOptions .degree-btn', 'selectedStrands', 'strandInput');
+         
+         function openSelectionModal() {
+             const modal = document.getElementById("selectionModal");
+             if (modal) modal.style.display = "flex";
+         }
+         
+         function closeSelectionModal() {
+             const modal = document.getElementById("selectionModal");
+             if (modal) modal.style.display = "none";
+         }
+         
+         
+         document.addEventListener("DOMContentLoaded", () => {
+         
+             const degreeCustomBtn = document.querySelector('button[value="DEGREE-CUSTOM-MODE"]');
+             const strandCustomBtn = document.querySelector('button[value="STRAND-CUSTOM-MODE"]');
+         
+             const degreeInput = document.getElementById('degreeInput');
+             const strandInput = document.getElementById('strandInput');
+         
+             if (degreeCustomBtn) {
+                 degreeCustomBtn.addEventListener('click', (e) => {
+                     if (!degreeInput.value.trim()) {
+                         e.preventDefault();
+                         openSelectionModal();
+                         removeLoadingScreenBody();
+                     }
+                 });
+             }
+         
+             if (strandCustomBtn) {
+                 strandCustomBtn.addEventListener('click', (e) => {
+                     if (!strandInput.value.trim()) {
+                         e.preventDefault();
+                         openSelectionModal();
+                         removeLoadingScreenBody();
+                     }
+                 });
+             }
+         });
+      </script>
+   </body>
+</html>

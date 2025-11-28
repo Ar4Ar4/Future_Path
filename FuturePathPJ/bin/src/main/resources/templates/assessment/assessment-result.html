@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <head>
+      <meta charset="UTF-8">
+      <title>FuturePath | Assessment Result</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>    
+      <link rel="stylesheet" th:href="@{/css/common.css}" />
+      <link rel="stylesheet" th:href="@{/css/assessment-result.css}" />
+   </head>
+   <body>
+      <nav th:replace="~{sidebar :: sidebar}"></nav>
+      <main th:object="${assessmentDto}">
+         <th:block th:if="${isSuccess}">
+            <div th:replace="~{alert :: success}"></div>
+         </th:block>
+         <th:block th:if="${isError}">
+            <div th:replace="~{alert :: error}"></div>
+         </th:block>
+         <nav th:replace="~{header :: header}"></nav>
+         <hr>
+         <nav class="sub-header">
+            <div>
+               <span class="crumb">FuturePath</span>
+               <i class="fa-solid fa-chevron-right separator"></i>
+               <span class="crumb">ASSESSMENT</span>
+               <i class="fa-solid fa-chevron-right separator"></i>
+               <span class="crumb active">RESULT</span>
+            </div>
+         </nav>
+         <hr>
+         <div class="content">
+            <!-- Result Summary -->
+            <div class="result-summary">
+               <h2>Assessment Completed 🎉</h2>
+               <div class="result-stats">
+                  <div class="stat-box"><strong>✅ Correct: </strong><span th:text=" *{totalCorrect}">0</span></div>
+                  <div class="stat-box"><strong>❌ Incorrect: </strong><span th:text=" *{totalIncorrect}">0</span></div>
+                  <div class="stat-box"><strong>📊 Score: </strong><span th:text="|*{percentage}%|">0%</span></div>
+               </div>
+               <section class="top-recommendations">
+                  <h3>🏆 Top 3 Recommended Fields</h3>
+                  <div class="top-list" th:if="*{top3Recommendations != null and !top3Recommendations.isEmpty()}">
+                     <div class="top-item" th:each="rec, stat : *{top3Recommendations}">
+                        <span class="rank" th:text="${stat.count} + '.'"></span>
+                        <span class="rec-name" th:text="${rec.name}"></span>
+                        <span class="rec-percent" th:text="|(${#numbers.formatDecimal(rec.percentage, 1, 1)}%)|"></span>
+                     </div>
+                  </div>
+                  <p th:unless="*{top3Recommendations != null and !top3Recommendations.isEmpty()}" style="text-align:center; color:#aab6ff; margin-top:1rem;">
+                     I'm sorry, you currently have no recommendations based on your answers.
+                  </p>
+               </section>
+               <section class="university-programs">
+                  <h3>🎓 All Universities Offering Programs</h3>
+                  <div class="university-list" id="universityList">
+                     <div class="university-item"
+                        th:each="university, iterStat : *{universities}"
+                        th:classappend="${iterStat.index >= 3} ? 'hidden' : ''">
+                        <div class="uni-header">
+                           <span class="uni-name" th:text="${university.universityName}"></span>
+                           <a th:href="@{'/universities/details?idPk=' + ${university.universityIdPk}}"  class="transitioning view-btn"
+                              type="button"
+                              th:onclick="'window.location.href=\'/universities/' + ${university.universityIdPk} + '\''">
+                           View
+                           </a>
+                        </div>
+                        <ul class="degree-list">
+                           <li th:each="program : ${university.offeredPrograms}" th:text="${program}"></li>
+                        </ul>
+                     </div>
+                  </div>
+                  <button id="showMoreBtn"
+                     th:if="*{universities != null and universities.size() > 3}"
+                     type="button"
+                     class="show-more-btn">
+                  Show More
+                  </button>
+                  <p th:unless="*{universities != null and !universities.isEmpty()}"
+                     class="no-universities">
+                     No universities available at the moment.
+                  </p>
+               </section>
+               <section class="scores-breakdown">
+                  <h3>🎯 Scores Breakdown</h3>
+                  <div class="recommendation-list">
+                     <div th:each="rec, iterStat : *{recommendationMap.values()}" class="score-row">
+                        <div class="score-icon">
+                           <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <div class="score-name" th:text="${rec.code}"></div>
+                        <div class="score-bar">
+                           <div class="score-bar-fill" 
+                              th:style="'width:' + ${rec.percentage} + '%;'" 
+                              th:text="${#numbers.formatDecimal(rec.percentage, 1, 1)} + '%'"></div>
+                        </div>
+                     </div>
+                  </div>
+               </section>
+            </div>
+            <div class="next-steps">
+               <h3>Next Steps</h3>
+               <button class="transitioning" onclick="window.location.href='/assessment'">Retake Assessment</button>
+               <button id="downloadSummaryBtn" type="button">Download Result (PDF)</button>
+               <button class="transitioning" onclick="window.location.href='/dashboard'">Go to Dashboard</button>
+               <button th:if="*{feedback == null AND owner}" id="feedbackModalBtn" data-bs-toggle="modal" data-bs-target="#feedbackModal" type="button">Give Feedback</button>
+               <button th:if="*{feedback != null}" id="viewFeedbackBtn" type="button">View Feedback</button>
+            </div>
+            <div class="feedback-result hidden" th:if="*{feedback != null}">
+               <h3>🎉 Thank you for your feedback!</h3>
+               <div class="feedback-summary">
+                  <div class="feedback-rating" th:with="rating=*{feedback.ratings}">
+                     <strong>Rating:</strong>
+                     <span th:each="i : ${#numbers.sequence(1,5)}">
+                     <i class="fa-solid fa-star"
+                        th:classappend="${i <= rating} ? 'text-yellow-400' : 'text-gray-300'"></i>
+                     </span>
+                  </div>
+                  <div class="feedback-text" style="margin-top:0.5rem;">
+                     <strong>Your Feedback:</strong>
+                     <p th:text="*{feedback.feedback}"></p>
+                  </div>
+               </div>
+               <script>
+                  document.addEventListener("DOMContentLoaded", function() {
+                      const viewBtn = document.getElementById("viewFeedbackBtn");
+                      const feedbackBox = document.querySelector(".feedback-result");
+                  
+                      if (viewBtn && feedbackBox) {
+                          viewBtn.addEventListener("click", () => {
+                              feedbackBox.classList.remove("hidden"); // show feedback
+                              viewBtn.style.display = "none";        // hide the button
+                          });
+                      }
+                  });
+                  
+               </script>
+            </div>
+            <div class="question-results">
+               <h3>Question Breakdown</h3>
+               <div class="question-card" th:each="question, iterStat : *{questions}">
+                  <h4 th:text="${iterStat.index + 1} + '. ' + ${question.question}"></h4>
+                  <div class="answer"
+                     th:classappend="${question.isCorrect} ? ' correct' : ' incorrect'">
+                     Your Answer: <span th:text="${question.userAnswer}"></span>
+                  </div>
+                  <div class="correct-answer"
+                     th:if="${!question.isCorrect}">
+                     ✔ Correct Answer: <span th:text="${question.correctAnswer}"></span>
+                  </div>
+               </div>
+            </div>
+         </div>
+         <!-- FEEDBACK / RATING MODAL -->
+         <div id="feedbackModal" class="modal-overlay hidden" th:if="*{feedback == null AND owner}">
+            <div class="modal-box">
+               <h3 class="modal-title">
+                  <i class="fa-solid fa-star"></i> GIVE FEEDBACK
+               </h3>
+               <!-- USER / ITEM HEADER -->
+               <div class="modal-user-header">
+                  <span id="feedbackName" class="highlight">Help us improve – your feedback matters!</span>
+               </div>
+               <!-- Feedback Form -->
+               <form id="feedbackForm" method="POST" th:action="@{/feedback}">
+                  <input type="hidden" name="idPk" id="feedbackId">
+                  <input type="hidden" name="resultIdPk" id="feedbackId" th:value="*{resultIdPk}">
+                  <!-- RATING -->
+                  <div class="flex justify-center mb-4">
+                     <span class="text-yellow-400 text-xl cursor-pointer rating-star" data-value="1">&#9733;</span>
+                     <span class="text-yellow-400 text-xl cursor-pointer rating-star" data-value="2">&#9733;</span>
+                     <span class="text-yellow-400 text-xl cursor-pointer rating-star" data-value="3">&#9733;</span>
+                     <span class="text-yellow-400 text-xl cursor-pointer rating-star" data-value="4">&#9733;</span>
+                     <span class="text-yellow-400 text-xl cursor-pointer rating-star" data-value="5">&#9733;</span>
+                  </div>
+                  <input type="hidden" name="ratings" id="feedbackRating">
+                  <!-- FEEDBACK TEXT -->
+                  <textarea name="feedback" id="feedbackText" placeholder="Write your feedback..." 
+                     class="w-full h-24 px-3 py-2 rounded-md border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-4"></textarea>
+                  <div class="modal-actions">
+                     <button type="button" class="btn btn-primary btn-cancel" data-close="modal">
+                     <i class="fa-solid fa-xmark"></i> CANCEL
+                     </button>
+                     <button type="submit" class="btn btn-primary btn-delete transitioning">
+                     <i class="fa-solid fa-paper-plane"></i> SUBMIT
+                     </button>
+                  </div>
+               </form>
+            </div>
+            <script>
+               // ⭐ RATING LOGIC
+               const stars = document.querySelectorAll('.rating-star');
+               const ratingInput = document.getElementById('feedbackRating');
+               
+               stars.forEach(star => {
+                 star.addEventListener('click', function() {
+                   const value = this.dataset.value;
+                   ratingInput.value = value;
+               
+                   // Highlight stars up to clicked
+                   stars.forEach(s => {
+                     s.style.color = s.dataset.value <= value ? '#FFD700' : '#d1d9ff';
+                   });
+                 });
+               });
+               
+               // Optional: reset stars on modal open
+               function openFeedbackModal(name, id) {
+                 document.getElementById('feedbackName').textContent = name;
+                 document.getElementById('feedbackId').value = id;
+                 document.getElementById('feedbackText').value = '';
+                 ratingInput.value = '';
+               
+                 stars.forEach(s => s.style.color = '#d1d9ff'); // reset
+                 document.getElementById('feedbackModal').classList.remove('hidden');
+               }
+            </script>
+         </div>
+         <script th:src="@{/script/modal.js}"></script>
+         <script th:inline="javascript">
+            console.clear();
+            console.log( /*[[${assessmentDto}]]*/ '');
+            document.addEventListener("DOMContentLoaded", function() {
+                const showMoreBtn = document.getElementById("showMoreBtn");
+                if (!showMoreBtn) return;
+            
+                showMoreBtn.addEventListener("click", () => {
+                    document.querySelectorAll("#universityList .hidden").forEach(el => el.classList.remove("hidden"));
+                    showMoreBtn.style.display = "none";
+                });
+            });
+            
+            document.getElementById("downloadSummaryBtn")?.addEventListener("click", async function() {
+                const {
+                    jsPDF
+                } = window.jspdf;
+                const summaryElement = document.querySelector(".result-summary");
+            
+                if (!summaryElement) {
+                    alert("Summary section not found!");
+                    return;
+                }
+            
+                summaryElement.scrollIntoView();
+            
+                const canvas = await html2canvas(summaryElement, {
+                    scale: 2,
+                    useCORS: true,
+                });
+            
+                const imgData = canvas.toDataURL("image/png");
+                const pdf = new jsPDF({
+                    orientation: "portrait",
+                    unit: "px",
+                    format: "a4"
+                });
+            
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+            
+                const imgWidth = pdfWidth - 40;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+                const yOffset = 20;
+                pdf.addImage(imgData, "PNG", 20, yOffset, imgWidth, imgHeight);
+            
+                pdf.save("Assessment_Summary.pdf");
+            });
+         </script>
+         <nav class="footer">
+            <div>
+               <span>All rights reserved by FuturePath</span>
+            </div>
+            <div class="terms">
+               <span>Terms of Use</span>
+               <span>Privacy Policy</span>
+               <span>Contact us</span>
+            </div>
+         </nav>
+      </main>
+      <script th:src="@{/script/loading.js}"></script>
+   </body>
+</html>

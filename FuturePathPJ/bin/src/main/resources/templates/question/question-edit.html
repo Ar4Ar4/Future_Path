@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>FuturePath | Strand & Degree</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<link rel="stylesheet" th:href="@{/css/common.css}" />
+<link rel="stylesheet" th:href="@{/css/question-add.css}" />
+<link rel="stylesheet" th:href="@{/css/dropdown.css}" />
+</head>
+<body>
+	
+	<nav th:replace="~{sidebar :: sidebar}"></nav>
+	<main>
+		<nav th:replace="~{header :: header}"></nav>
+		<hr>
+		<nav class="sub-header">
+			<div>
+          	  <span class="crumb">FuturePath</span>
+			  <i class="fa-solid fa-chevron-right separator"></i>
+    	      <span class="crumb">QUESTIONS</span>
+			  <i class="fa-solid fa-chevron-right separator"></i>
+			  <span class="crumb active">EDIT</span>
+          </div>
+		</nav>
+		<hr>
+		<div class="content">
+
+			<form class="form" th:action="@{/admin/questions/edit}" method="POST" th:object="${questionDto}">
+				<input type="hidden" name="idPk" th:value="*{idPk}" />
+				<div class="field-group">
+					<div class="field">
+					    <label>CATEGORY</label>  
+					    <div class="input-wrapper">
+					      <i class="fas fa-list-alt"></i>
+					      <select name="category" class="dropdown" disabled>
+					      	<option value="">Select Type...</option>
+					      	<option th:selected="*{questionObj.category == 'STRAND'}">STRAND</option>
+                            <option th:selected="*{questionObj.category == 'DEGREE'}">DEGREE</option>
+					      </select>
+					    </div>
+					</div>
+					<div class="field">
+					    <label>STRAND/DEGREE</label>  
+					    <div class="input-wrapper">
+					      <i class="fas fa-graduation-cap"></i>
+					      <select name="strandegreeIdPk" class="required dropdown">
+					      	<option value="">Select Strand/Degree...</option>
+					      	<option th:each="strandegree : ${strandegreeDto.strandegrees}" 
+					      		th:text="${strandegree.category} + '-' + ${strandegree.code}"
+					      		th:value="${strandegree.idPk}"
+					      		th:selected="*{questionObj.strandegree} == ${strandegree.code}"
+					      	>STRAND</option>
+					      </select>
+					    </div>
+					</div>
+				</div>
+							
+				<!-- Question -->
+				<div class="field-group">
+					<div class="field">
+					    <label>QUESTION</label>  
+					    <div class="input-wrapper">
+					      <i class="fas fa-question-circle"></i>
+					      <textarea name="question" placeholder="Enter your question" th:text="*{questionObj.question}" class="required"></textarea>
+					    </div>
+					</div>
+				</div>
+							
+				<!-- Answers -->
+			<div class="field-group">
+                  <div class="field">
+                     <label>ANSWERS</label>
+                     <div class="input-wrapper answer-option">
+                        <i class="fas fa-check-circle"></i>
+                        <input type="text" placeholder="Enter answer option" name="answers[0]" th:value="*{questionObj.answers[0].answer}" class="required"/>
+                        <label class="check-btn">
+                        <input type="radio" name="correctIndex" value="0" th:checked="*{questionObj.answers[0].isCorrect}" class="required">
+                        <span class="check-circle"></span>
+                        </label>
+                     </div>
+                     <div class="input-wrapper answer-option">
+                        <i class="fas fa-check-circle"></i>
+                        <input type="text" placeholder="Enter answer option" name="answers[1]" th:value="*{questionObj.answers[1].answer}" class="required"/>
+                        <label class="check-btn">
+                        <input type="radio" name="correctIndex" value="1" th:checked="*{questionObj.answers[1].isCorrect}" class="required">
+                        <span class="check-circle"></span>
+                        </label>
+                     </div>
+                     <div class="input-wrapper answer-option">
+                        <i class="fas fa-check-circle"></i>
+                        <input type="text" placeholder="Enter answer option" name="answers[2]" th:value="*{questionObj.answers[2].answer}" class="required"/>
+                        <label class="check-btn">
+                        <input type="radio" name="correctIndex" value="2" th:checked="*{questionObj.answers[2].isCorrect}" class="required">
+                        <span class="check-circle"></span>
+                        </label>
+                     </div>
+                  </div>
+               </div>
+							
+				<hr>
+				<!-- Buttons -->
+				<div class="btn-group">
+					<a th:href="@{/admin/questions}" class="btn btn-secondary transitioning">
+						<i class="fas fa-times"></i> CANCEL
+					</a>
+					<button type="submit" class="btn btn-primary transitioning">
+						<i class="fas fa-save"></i> SAVE
+					</button>
+				</div>
+			</form>
+				
+		</div>
+		<nav class="footer">
+			<div>
+				<span>All rights reserved by FuturePath</span>
+			</div>
+			<div class="terms">
+				<span>Terms of Use</span>
+				<span>Privacy Policy</span>
+				<span>Contact us</span>
+			</div>
+		</nav>
+		<!-- Unfilled Fields Modal -->
+         <div id="unfilledModal" class="themed-modal-overlay">
+            <div class="themed-modal-box">
+               <h3>Missing Information</h3>
+               <p>Please fill out all required fields before updating the question.</p>
+               <div class="themed-modal-actions">
+                  <button class="modal-btn" onclick="closeUnfilledModal()">OK</button>
+               </div>
+            </div>
+         </div>
+	</main>
+	<script th:inline="javascript">
+		console.log(/*[[${questionDto}]]*/'');
+	</script>
+	<script th:src="@{/script/loading.js}"></script>
+	<script th:src="@{/script/dropdown.js}"></script>
+	<script>
+         function openUnfilledModal() {
+             document.getElementById("unfilledModal").style.display = "flex";
+         }
+         
+         function closeUnfilledModal() {
+             document.getElementById("unfilledModal").style.display = "none";
+         }
+         
+         document.addEventListener("DOMContentLoaded", () => {
+             const form = document.querySelector(".form");
+         
+             form.addEventListener("submit", function(e) {
+                 let emptyFound = false;
+         
+                 // Only check text inputs inside .field
+                 form.querySelectorAll(".required").forEach(input => {
+                     if (!input.value.trim()) emptyFound = true;
+                 });
+         
+                 // Check underlying selects (custom dropdown)
+                 form.querySelectorAll("required").forEach(select => {
+
+                     if (!select.value) emptyFound = true; 
+                 });
+                 
+                 // Validate radio group
+		        const radioChecked = document.querySelector('input[name="correctIndex"]:checked');
+		        if (!radioChecked) emptyFound = true;
+         
+                 if (emptyFound) {
+                     e.preventDefault();
+                     openUnfilledModal();
+                     removeLoadingScreenBody();
+                 }
+             });
+         });
+         
+         
+      </script>
+</body>
+</html>
