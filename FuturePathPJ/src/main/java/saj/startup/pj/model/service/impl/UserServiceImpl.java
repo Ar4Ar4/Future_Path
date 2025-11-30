@@ -34,7 +34,13 @@ public class UserServiceImpl implements UserService{
 	private PasswordEncoder encoder;
 
 	@Override
-	public void saveUser(UserDto inDto) throws Exception {
+	public boolean saveUser(UserDto inDto) throws Exception {
+		
+		UserEntity existingUser = userLogic.getUserByUsername(inDto.getUsername());
+		
+		if(existingUser != null) {
+			return false;
+		}
 		
 		Timestamp timeNow = new Timestamp(System.currentTimeMillis());
 		
@@ -50,9 +56,11 @@ public class UserServiceImpl implements UserService{
 		newUser.setIsActive(true);
 		newUser.setIsDeleted(false);
 		newUser.setCreatedAt(timeNow);
-		newUser.setRole(CommonConstant.ROLE_USER);
+		newUser.setRole(inDto.getRole());
 		
 		userLogic.saveUser(newUser);
+		
+		return true;
 	}
 	
 	@Override
@@ -147,6 +155,7 @@ public class UserServiceImpl implements UserService{
 	    obj.setPhone(user.getPhone());
 	    obj.setGender(user.getGender());
 	    obj.setUsername(user.getUsername());
+	    obj.setRole(user.getRole());
 		
 		outDto.setUser(obj);	
 		
@@ -168,7 +177,11 @@ public class UserServiceImpl implements UserService{
 		existing.setPhone(inDto.getPhone());
 		existing.setGender(inDto.getGender());
 		existing.setUsername(inDto.getUsername());
-		existing.setPassword(encoder.encode(inDto.getPassword()));
+		existing.setRole(inDto.getRole());
+		
+		if(inDto.getPassword() != null && !inDto.getPassword().isEmpty()) {
+			existing.setPassword(encoder.encode(inDto.getPassword()));
+		}
 		
 		userLogic.saveUser(existing);		
 		
