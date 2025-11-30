@@ -60,14 +60,14 @@
                </div>
             </div>
             <div class="quick-actions-card">
-               <div class="title">⚡ Quick Actions</div>
-               <div class="actions-container">
-                  <button class="btn primary">Take Assessment</button>
-                  <button class="btn primary">View All University</button>
-                  <button class="btn primary">View All Programs</button>
-                  <button class="btn primary">View All History</button>
-               </div>
-            </div>
+			   <div class="title">⚡ Quick Actions</div>
+			   <div class="actions-container">
+			      <a class="btn primary" th:href="@{/assessment}">Take Assessment</a>
+			      <a class="btn primary" th:href="@{/history}">View History</a>
+			      <a class="btn primary" th:href="@{/strandegrees}">Strand and Degree</a>
+			      <a class="btn primary" th:href="@{/universities}">Universities</a>
+			   </div>
+			</div>
             <div class="group-row">
                <div class="group-column">
                   <div class="assessment-card">
